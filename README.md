@@ -332,3 +332,4 @@ full. -->
 ---
 
 📖 **How to run this project: [RUNNING.md](RUNNING.md)**
+Listing fields: title, price, size, category, style_tags, colors, platform
