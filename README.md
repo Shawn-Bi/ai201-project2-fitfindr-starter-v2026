@@ -39,7 +39,7 @@
 
 ## What This Does
 
-<!-- Three or four sentences: what a user asks for, and what they get back. -->
+A user types what they want, like "vintage graphic tee under $30". FitFindr searches thrift listings, picks the best match, suggests outfits using the user's wardrobe, and writes a short caption they could post. If nothing matches, it stops and tells them what to change.
 
 
 
@@ -80,9 +80,9 @@
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** regex. It pulls the price from "$30" and the size from "size M"; the rest of the text becomes the description.
 
-**What moves through the session:** <!-- which fields, in what order -->
+**What moves through the session:** parsed → search_results → selected_item → outfit_suggestion → fit_card (or error, if search is empty).
 
 ---
 
@@ -96,29 +96,45 @@
 **One full query**
 
 ```
-$ python app.py ask '...'
+$ python app.py ask 'vintage graphic tee under $30'
 
+  Found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+
+  Outfit:   Pair the baby tee with your baggy dark-wash straight-leg jeans and chunky white sneakers for an effortless, authentic Y2K look. Layer the black cropped zip hoodie on top and add your black crossbody bag to complete the casual, nostalgic outfit.
+
+  Fit card: Still not over how cute this butterfly Y2K baby tee is, and it's up on my Depop right now for just $18! Honestly just picturing this with baggy dark-wash straight-leg jeans, chunky white sneakers, and a black cropped zip hoodie for the ultimate effortless, nostalgic fit. Grab it before I change my mind and keep it for myself! ✨🦋
+
+2 model calls this session, 300 prompt + 129 output tokens
+```
+
+**Empty search (the branch)**
+
+```
+$ python app.py ask 'designer ballgown size XXS under $5'
+
+  No listings matched 'designer ballgown' in size XXS under $5. Try broader keywords, a different size, or a higher price limit.
+
+0 model calls this session
 ```
 
 **The three tools, tested one at a time**
 
 ```
 $ python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
-
+[{'id': 'lst_002', 'title': 'Y2K Baby Tee — Butterfly Print', 'description': 'Super cute early 2000s baby tee with butterfly graphic. Fitted crop length. Tag says medium but fits like a small.', 'category': 'tops', 'style_tags': ['y2k', 'vintage', 'graphic tee', 'cottagecore'], 'size': 'S/M', 'condition': 'excellent', 'price': 18.0, 'colors': ['white', 'pink', 'purple'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_006', 'title': 'Graphic Tee — 2003 Tour Bootleg Style', 'description': 'Vintage-style bootleg tee with faded graphic. Slightly boxy fit. 100% cotton, soft and worn-in.', 'category': 'tops', 'style_tags': ['graphic tee', 'vintage', 'grunge', 'streetwear', 'band tee'], 'size': 'L', 'condition': 'good', 'price': 24.0, 'colors': ['black'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_017', 'title': 'Mesh Long-Sleeve Top — Black', 'description': 'Sheer black mesh long-sleeve. Great for layering under a graphic tee or over a bralette. Stretchy material, fits true to size.', 'category': 'tops', 'style_tags': ['y2k', 'grunge', 'goth', 'layering'], 'size': 'S/M', 'condition': 'excellent', 'price': 15.0, 'colors': ['black'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_033', 'title': 'Vintage Band Tee — Faded Grey', 'description': 'Faded grey band-style tee with distressed graphic. Crew neck. Fits boxy. Well-loved but no holes or major damage.', 'category': 'tops', 'style_tags': ['vintage', 'grunge', 'band tee', 'graphic tee', 'streetwear'], 'size': 'L', 'condition': 'fair', 'price': 19.0, 'colors': ['grey', 'charcoal'], 'brand': None, 'platform': 'depop'}, {'id': 'lst_011', 'title': 'Low-Rise Cargo Pants — Khaki', 'description': 'Y2K era low-rise cargo pants. Lots of pockets. Khaki color, slightly distressed at the hems. Great for layering with a long tee.', 'category': 'bottoms', 'style_tags': ['y2k', 'cargo', '2000s', 'streetwear'], 'size': 'W29', 'condition': 'fair', 'price': 27.0, 'colors': ['khaki', 'tan'], 'brand': None, 'platform': 'poshmark'}, {'id': 'lst_012', 'title': 'Oversized Crewneck Sweatshirt — Vintage Navy', 'description': 'Perfectly faded navy crewneck. Genuinely vintage — not manufactured distressed. Ribbed cuffs and hem. No graphics, clean.', 'category': 'tops', 'style_tags': ['vintage', 'basics', 'oversized', 'classic'], 'size': 'XL (fits oversized)', 'condition': 'good', 'price': 20.0, 'colors': ['navy'], 'brand': None, 'platform': 'thredUp'}, {'id': 'lst_015', 'title': 'Vintage Graphic Hoodie — Faded Black', 'description': 'Faded black pullover hoodie with barely-visible vintage graphic on the chest. Cozy interior. Some pilling but adds to the worn-in look.', 'category': 'tops', 'style_tags': ['vintage', 'grunge', 'graphic', 'streetwear'], 'size': 'L', 'condition': 'fair', 'price': 26.0, 'colors': ['black', 'charcoal'], 'brand': None, 'platform': 'depop'}]
 ```
 
 ```
-$ python -c "from tools import suggest_outfit; ..."
-
+$ python -c "from tools import suggest_outfit; from utils.data_loader import get_empty_wardrobe, load_listings; print(suggest_outfit(load_listings()[0], get_empty_wardrobe()))"
+Pair these vintage Levi's 501s with a crisp white t-shirt, a classic leather belt, and black ankle boots for an effortlessly cool, timeless look. Alternatively, layer an oversized flannel shirt or a vintage hoodie over a graphic tee and finish with chunky sneakers for a relaxed, streetwear-inspired outfit.
 ```
 
 ```
-$ python -c "from tools import create_fit_card; ..."
-
+$ python -c "from tools import create_fit_card; from utils.data_loader import load_listings; print(create_fit_card('jeans and a white tee', load_listings()[0]))"
+Literally living in this medium wash vibe all autumn long. Found these classic vintage Levi's 501s and they just fit like a dream with a simple white tee. Grab them on my Depop right now for $38 before I change my mind and keep them.
 ```
 
 ---
-
 ## How I Used AI
 
 **Moment 1**
@@ -128,9 +144,9 @@ $ python -c "from tools import create_fit_card; ..."
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I asked Claude to help write the code for the three tools and run_agent, then asked why my fit cards came out identical.
+- *What came back:* Working code, and it said identical captions came from either the cache or TEMPERATURE = 0.
+- *What I changed:* I found TEMPERATURE was already 0.9, so I set AI201_CACHE=0, confirmed the captions changed, then turned the cache back on.
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
