@@ -47,55 +47,36 @@
 
 ## Tool Inventory
 
-### suggest_outfit
-- Does: Suggests 1-2 outfits pairing the new item with the user's wardrobe.
-- Inputs: new_item (dict), wardrobe (dict with an 'items' list)
-- Returns: non-empty str of outfit suggestions naming owned pieces
-- Empty wardrobe: returns general styling advice, never "" or an error
-
-### create_fit_card
-- Does: Writes a short, postable caption about the find.
-- Inputs: outfit (str), new_item (dict)
-- Returns: str, 2-4 sentences, mentions item, price, platform once each
-- Empty outfit: returns a descriptive message instead of raising
-
 ### `search_listings`
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Finds listings that match a description, with optional size and price filters.
+- **Inputs:** `description` (str), `size` (str or None), `max_price` (float or None)
+- **Returns:** list of listing dicts (id, title, price, size, platform, ...), best match first
+- **When it has nothing:** returns an empty list `[]`, not None or an error
+- **Size rule:** the listing size is split into words (on spaces, "/", "(", ")"), and it matches if the user's size equals one of those words, case-insensitive. "M" matches "S/M" but "S" does not match "US 9".
 
 ### `suggest_outfit`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Suggests 1-2 outfits pairing the new item with the user's wardrobe.
+- **Inputs:** `new_item` (dict), `wardrobe` (dict with an 'items' list)
+- **Returns:** non-empty str of outfit suggestions naming owned pieces
+- **When it has nothing:** empty wardrobe returns general styling advice, never "" or an error
 
 ### `create_fit_card`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Writes a short, postable caption about the find.
+- **Inputs:** `outfit` (str), `new_item` (dict)
+- **Returns:** str, 2-4 sentences, mentions item, price, platform once each
+- **When it has nothing:** empty outfit returns a descriptive message instead of raising
 
 ---
 
 ## Planning Loop
 
-<!-- Your branch rule, stated as a rule — the condition AND both paths — plus
-     the file and function that holds it.
 
-     Like this:
-       "If search_listings returns an empty list, put a message in the session
-        and stop. Otherwise take the first result and go to suggest_outfit."
-        — agent.py::run_agent
 
-     The grader checks your code against what you claim here, so the file and
-     function have to be real. -->
 
-**Branch rule:**
+**Branch rule:** If search_listings returns an empty list, put a message in the session naming what to change and stop. Otherwise take the first result and go to suggest_outfit.
 
 **Where it lives:** `agent.py::run_agent`
 
