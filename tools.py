@@ -191,5 +191,6 @@ def create_fit_card(outfit: str, new_item: dict) -> str:
               f"Item: {new_item['title']}\nPrice: ${new_item['price']:.0f}\n"
               f"Platform: {new_item['platform']}\nOutfit idea: {outfit}\n"
               "Sound like a real person posting, not a product description. "
-              "Mention the item, price, and platform once each, and be specific about the vibe.")
+              "Use the item's exact title, word for word, once. "
+              "Mention the price and platform once each, and be specific about the vibe.")
     return generate(prompt)
