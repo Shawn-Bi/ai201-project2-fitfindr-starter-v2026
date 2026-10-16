@@ -132,7 +132,12 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
         if step == "search":
             p = session["parsed"]
-            session["search_results"] = search_listings(p["description"], p["size"], p["max_price"])
+            from mcp_client import call_tool
+            session["search_results"] = call_tool("search_listings", {
+                "description": p["description"],
+                "size": p["size"],
+                "max_price": p["max_price"],
+            })
             if not session["search_results"]:   # THE BRANCH
                 session["error"] = (
                     f"No listings matched '{description}'"
