@@ -217,15 +217,27 @@ that produced it:
 
 ## Loop Trace
 
-<!-- One full run, printed step by step, with the MCP call visible in it.
+```
+$ python app.py ask 'vintage graphic tee under $30' --trace
+[1] parse_query
+      in:  vintage graphic tee under $30
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 listings
+[3] suggest_outfit
+      in:  Y2K Baby Tee — Butterfly Print
+      out: Pair the baby tee with your baggy dark-wash straight-leg jeans and chunky white sneakers for an effortless, au…
+[4] create_fit_card
+      in:  Y2K Baby Tee — Butterfly Print
+      out: Still not over how cute this butterfly Y2K baby tee is, and it's up on my Depop right now for just $18! Honest…
+```
 
-     `python app.py ask '...' --trace` once you've added the trace.step()
-     calls in Milestone 2.
+**Failure modes, triggered on purpose**
 
-     Worth pasting BOTH the happy path and the empty-search path. The empty
-     one should be visibly shorter, because it stops. If your two traces are
-     the same length, your branch isn't working — and this is the fastest way
-     anyone will ever find that out. -->
+- Empty search (`'designer ballgown size XXS under $5'`): "No listings matched 'designer ballgown' in size XXS under $5. Try broader keywords, a different size, or a higher price limit." Stops before suggest_outfit, 0 model calls.
+- Empty wardrobe (`--empty-wardrobe`): returned general styling advice (pleated tennis skirt, platforms, wide-leg denim), no crash, not empty.
+- Model unavailable (one character of the key changed): "ModelUnavailable: The model rejected your API key. Check GEMINI_API_KEY in your .env file, or create a fresh key at aistudio.google.com." No stack trace. This message is clear to a developer but not to an end user.
 
 **Happy path**
 

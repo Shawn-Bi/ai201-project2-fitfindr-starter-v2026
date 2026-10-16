@@ -122,6 +122,7 @@ def run_agent(query: str, wardrobe: dict) -> dict:
             description = description.replace(m.group(0), " ")
     description = re.sub(r"\b(in|for)\b|,", " ", description, flags=re.I).strip()
     session["parsed"] = {"description": description, "size": size, "max_price": max_price}
+    trace.step("parse_query", inputs=query, returned=session["parsed"])
 
     # 2. The loop: each step looks at the last result to pick the next one
     step = "search"
@@ -138,6 +139,8 @@ def run_agent(query: str, wardrobe: dict) -> dict:
                 "size": p["size"],
                 "max_price": p["max_price"],
             })
+            trace.step("search_listings (via MCP)", inputs=session["parsed"],
+                       returned=f"{len(session['search_results'])} listings")
             if not session["search_results"]:   # THE BRANCH
                 session["error"] = (
                     f"No listings matched '{description}'"
@@ -151,10 +154,15 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
         elif step == "outfit":
             session["outfit_suggestion"] = suggest_outfit(session["selected_item"], wardrobe)
+            trace.step("suggest_outfit", inputs=session["selected_item"]["title"],
+                       returned=session["outfit_suggestion"])
             step = "card"
+            
 
         elif step == "card":
             session["fit_card"] = create_fit_card(session["outfit_suggestion"], session["selected_item"])
+            trace.step("create_fit_card", inputs=session["selected_item"]["title"],
+                       returned=session["fit_card"])
             step = "done"
 
     return session
