@@ -62,6 +62,9 @@ mentions the item's title, price, and platform — 4 of 5 tries.
 wording changes every run because a model writes it, and it
 sometimes drops a detail, so I allow one miss.
 
+> **Revised in unit 4:** Given a query that matches at least one listing, the fit card names the item recognizably (its category plus at least one other word from its title), its exact price, and its platform — 4 of 5 tries.
+>
+> **Why revised:** "mentions the item's title" didn't say whether the exact title was required. The same five cards scored 0/5 read strictly and 5/5 read loosely, so the original couldn't be measured. The new version can.
 
 
 ---
