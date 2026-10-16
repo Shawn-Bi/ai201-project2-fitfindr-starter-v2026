@@ -199,32 +199,19 @@ Outfit: Pair this cropped denim jacket with high-waisted black trousers and a fi
 
 ## Verdicts and Diagnoses
 
-<!-- MET or MISSED per criterion against LAST UNIT's target, plus a sentence on
-     how you decided.
+| # | Verdict | How I decided |
+|---|---|---|
+| 1 | MET (5/5) | All five tries reached create_fit_card and returned a fit card. Target was 4 of 5. |
+| 2 | MET (5/5) | All five tries got 0 listings from search_listings and stopped before suggest_outfit, with a message naming what to change. |
+| 3 | MET (5/5) | In all five tries, selected_item and the item passed to suggest_outfit had the same title. Caveat: the run log prints titles, not ids, so I judged by title plus the code path (both read session["selected_item"]). |
+| 4 | MET (5/5, revised reading) | All five cards named the item recognizably, said $32, and said Depop. Read strictly (exact title), it is 0/5. See the revision in criteria.md. |
+| 5 | MET (5/5) | All five empty-wardrobe tries returned non-empty general advice, no error. |
 
-     Then, for every miss: which of the four places it happened — a tool, the
-     loop's branch, the session, or the model's output — AND the mechanism.
+**No misses.** Nothing failed against the targets I set, so there is no failure to diagnose. Honestly, that says my targets were too easy in three places:
 
-     Not a diagnosis:  "The fit card was bad."
-     A diagnosis:      "The fit card criterion missed on 2 of 5 items. Both had
-                        an empty brand field. My prompt puts the brand in the
-                        first sentence, so the card opened with a blank and read
-                        like a fragment. The tool worked; the prompt assumed a
-                        field that isn't always there."
-
-     Look for a pattern. Three misses on the same tool is one problem, not
-     three. -->
-
-| # | Criterion | Target | Verdict | How I decided |
-|---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
-
-**Diagnoses**
-
+- **Criterion 1 measures completion, not relevance.** `search_listings('graphic tee')` also returns Low-Rise Cargo Pants (lst_011), because its description contains "long tee". The keyword match in `tools.py::search_listings` scores any word overlap, so a wrong item can be picked and criterion 1 still passes.
+- **Criterion 3 can't fail the way it's tested.** Both steps read the same session field, and the log shows titles, not ids.
+- **Criterion 4 is the one I'd tighten.** Read strictly, the model's output never used the exact title in 5 of 5 cards. The step is `tools.py::create_fit_card`, and the mechanism is the prompt: it gives the model the title as one field among several and asks it to "sound like a real person", so it paraphrases the title every time.
 
 
 ---
