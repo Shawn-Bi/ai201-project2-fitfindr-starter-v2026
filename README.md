@@ -263,31 +263,38 @@ full. -->
 
 ## The Improvement
 
-<!-- What you changed, why your diagnosis pointed at it, and the after-run in
-     the same table format. One change, measured properly.
+**What I changed:** one prompt line in `tools.py::create_fit_card`. Before: "Mention the item, price, and platform once each." After: "Use the item's exact title, word for word, once. Mention the price and platform once each."
 
-     `python run_eval.py --label after` -->
+**Why this one:** my diagnosis found criterion 4 only passed on a loose reading. Read strictly, 0 of 5 cards used the exact title, because the prompt let the model paraphrase it.
 
-**What I changed:**
+**Did it help?** Yes. Exact title in the card (case-insensitive), across all four scenarios that reach create_fit_card:
 
-**Which failure it was meant to fix:**
+| Scenario | Before | After |
+|---|---|---|
+| corduroy pants (criterion 4) | 0/5 | 5/5 |
+| vintage graphic tee | 0/5 | 5/5 |
+| flannel shirt | 0/5 | 5/5 (one in lowercase) |
+| denim jacket (empty wardrobe) | 0/5 | 3/5 |
+| **Total** | **0/20** | **18/20** |
+
+Price and platform still appeared in 20 of 20 cards after the change.
 
 ### Run Log — After
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Impossible query stops before tool 2 | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. Item in session matches item passed on | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. Fit card mentions item, price, platform | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5, now also exact title 5/5) |
+| 5. Empty wardrobe returns advice | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Did it help, and how do I know:**
+Produced by `run_eval.py::main` → `results/run_2026-10-16_0142_after.md`. Same scenarios, caching off, temperature 0.9.
 
-<!-- If it made things worse, say that. Honestly reported, that earns full
-     credit and is more interesting than one that worked. -->
-
-
+**Criterion 4, try 1, after** (`corduroy pants under $40`):
+```
+Obsessed with the 70s texture of these Corduroy Wide-Leg Pants — Rust! I've been living in cozy fits lately, so styling these with a ribbed tank, zip hoodie, and chunky sneakers is pretty much my uniform right now. Grabbed them for just $32 over on my Depop if anyone wants to steal this vintage-meets-casual everyday look!
+```
 
 ---
 
